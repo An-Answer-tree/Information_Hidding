@@ -4,7 +4,7 @@ from scipy.fft import fft, ifft
 import matplotlib.pyplot as plt
 
 # 步骤1: 读取音频文件
-rate, data = wavfile.read('your_audio_file.wav')  # 替换成你的音频文件名
+rate, data = wavfile.read('music.wav')  # 替换成你的音频文件名
 
 # 步骤2: 一维离散傅里叶变换
 data_fft = fft(data)
