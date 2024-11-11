@@ -21,18 +21,18 @@ idct_reconstructed = idct(dct_transformed, type=2, norm='ortho')
 plt.figure(figsize=(12, 8))
 
 # 原始音频信号
-plt.subplot(3, 1, 1)
-plt.plot(audio_channel, color='blue')
+plt.subplot(2, 2, 1)
+plt.plot(audio_channel)
 plt.title("Original Audio Waveform")
 
 # DCT变换后的频域表示
-plt.subplot(3, 1, 2)
-plt.plot(dct_transformed, color='red')
+plt.subplot(2, 2, 2)
+plt.plot(dct_transformed)
 plt.title("After DCT")
 
 # 逆DCT变换重建的音频信号
-plt.subplot(3, 1, 3)
-plt.plot(idct_reconstructed, color='green')
+plt.subplot(2, 2, 3)
+plt.plot(idct_reconstructed)
 plt.title("Recovered Audio Waveform")
 
 plt.tight_layout()
