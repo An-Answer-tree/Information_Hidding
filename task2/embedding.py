@@ -5,8 +5,8 @@ def embed_text_in_audio(audio_file_in, text, audio_file_out, m0, m1, N, attenuat
     # 读取音频文件
     sample_rate, audio_data = wavfile.read(audio_file_in)
     
-    # 如果是立体声，转换为单声道
-    if audio_data.ndim == 2:
+    # 只使用一个声道
+    if audio_data.ndim > 1:
         audio_data = audio_data[:, 0]
     
     # 将音频数据转换为浮点型并归一化
@@ -22,7 +22,7 @@ def embed_text_in_audio(audio_file_in, text, audio_file_out, m0, m1, N, attenuat
         raise ValueError("音频文件过短，无法嵌入所有文本信息。")
     
     # 初始化嵌入后的音频数据
-    stego_audio = []
+    stegano_audio = []
     for i, bit in enumerate(bits):
         # 获取子帧
         subframe = audio_data[i*N : (i+1)*N]
@@ -36,38 +36,38 @@ def embed_text_in_audio(audio_file_in, text, audio_file_out, m0, m1, N, attenuat
             delayed[m:] = subframe[:-m]
         echo_subframe = subframe + attenuation * delayed
         
-        stego_audio.append(echo_subframe)
+        stegano_audio.append(echo_subframe)
         
     # 将所有子帧连接起来
-    stego_audio = np.concatenate(stego_audio)
+    stegano_audio = np.concatenate(stegano_audio)
     
     # 填充剩余的音频数据
     remaining_audio = audio_data[num_bits*N:]
-    stego_audio = np.concatenate((stego_audio, remaining_audio))
+    stegano_audio = np.concatenate((stegano_audio, remaining_audio))
     
     # 将浮点型转换回整数型并写入文件
-    stego_audio_int = np.int16(stego_audio / np.max(np.abs(stego_audio)) * 32767)
-    wavfile.write(audio_file_out, sample_rate, stego_audio_int)
+    stegano_audio_int = np.int16(stegano_audio / np.max(np.abs(stegano_audio)) * 32767)
+    wavfile.write(audio_file_out, sample_rate, stegano_audio_int)
     
     
 def extract_text_from_audio(audio_file_in, m0, m1, N):
     # 读取音频文件
-    sample_rate, stego_audio_data = wavfile.read(audio_file_in)
+    sample_rate, stegano_audio_data = wavfile.read(audio_file_in)
     
     # 如果是立体声，转换为单声道
-    if stego_audio_data.ndim == 2:
-        stego_audio_data = stego_audio_data[:, 0]
+    if stegano_audio_data.ndim == 2:
+        stegano_audio_data = stegano_audio_data[:, 0]
     
     # 将音频数据转换为浮点型并归一化
-    stego_audio_data = stego_audio_data.astype(np.float32)
-    stego_audio_data /= np.max(np.abs(stego_audio_data))
+    stegano_audio_data = stegano_audio_data.astype(np.float32)
+    stegano_audio_data /= np.max(np.abs(stegano_audio_data))
     
-    num_subframes = len(stego_audio_data) // N
+    num_subframes = len(stegano_audio_data) // N
     
     bits = ''
     for i in range(num_subframes):
         # 获取子帧
-        subframe = stego_audio_data[i*N : (i+1)*N]
+        subframe = stegano_audio_data[i*N : (i+1)*N]
         
         # 计算倒谱
         spectrum = np.fft.fft(subframe)
@@ -93,13 +93,18 @@ def extract_text_from_audio(audio_file_in, m0, m1, N):
     return text
 
 def main():
-    audio_file_in = 'music2.wav'  # 输入的音频文件
-    text = '921127970138'         # 要隐藏的文本
-    audio_file_out = 'output.wav' # 输出的音频文件
-    
-    m0 = 180   # 当比特为 '0' 时的回声时延
-    m1 = 200   # 当比特为 '1' 时的回声时延
-    N = 4410   # 子帧的样本数（100ms，对于44100Hz的采样率）
+    audio_file_in = 'Before_I_Rise.wav'  # 输入的音频文件
+    # 要隐藏的文本
+    # "谁问你了"英文圣经节选🤣
+    text = 'NiceOpinionButThere\'sJustOneSmallProblemWithIt:WhoAsked?LikeGenuinelyWhoAsked?WhoGaveYouTheTalkingStick?I\'llTellYouNobodyDidNobodyAskedDudeThereAreZeroPeopleWhoAskedAmongUsLookIInvitedEveryoneWhoAskedToThisPartyAYOThisIsPhotoOfEveryoneWhoAskedYooCheckItOutIt\'sABusFullOfEveryoneWhoAskedYouKnowWhatManI\'llDoYouAFavorClearlyWeCan\'tSeeWhoAskedSoI\'mJustGonnaDoItMyselfI\'mGonnaFindOutWhoAsked'
+    audio_file_out = 'output_'+ audio_file_in # 输出的音频文件
+    rate, data = wavfile.read(audio_file_in)    # 获取采样率
+    del data
+
+    帧长 = 100   # 子帧的长度(ms)
+    m0 = 120   # 当比特为 '0' 时的回声时延
+    m1 = 180   # 当比特为 '1' 时的回声时延
+    N = int(rate*帧长/1000)   # 子帧的样本数
     attenuation = 0.5  # 回声的衰减因子
     
     # 调用嵌入函数
@@ -108,6 +113,7 @@ def main():
     
     # 调用提取函数
     extracted_text = extract_text_from_audio(audio_file_out, m0, m1, N)
+    print('写入的文本为:', text)
     print('提取的文本为:', extracted_text)
     
 if __name__ == '__main__':
