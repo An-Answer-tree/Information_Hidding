@@ -3,12 +3,13 @@ from scipy.io import wavfile
 from scipy.fftpack import dct, idct
 import matplotlib.pyplot as plt
 
-# 读取多声道wav音频文件
+# 读取wav音频文件
 file_path = 'music.wav'  # 请替换为实际文件路径
-sample_rate, audio_data = wavfile.read(file_path)
+sample_rate, audio_channel = wavfile.read(file_path)
 
 # 只选择一个声道（例如第一个声道）进行分析
-audio_channel = audio_data[:, 0]
+if audio_channel.ndim > 1:
+    audio_channel = audio_channel[:, 0]
 
 # 执行一维DCT变换
 dct_transformed = dct(audio_channel, type=2, norm='ortho')

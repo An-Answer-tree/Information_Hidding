@@ -3,12 +3,13 @@ from scipy.io import wavfile
 import pywt
 import matplotlib.pyplot as plt
 
-# 读取多声道音频文件
+# 读取wav音频文件
 file_path = 'music.wav'  # 请替换为实际文件路径
-sample_rate, audio_data = wavfile.read(file_path)
+sample_rate, audio_channel = wavfile.read(file_path)
 
 # 选择一个声道（例如第一个声道）进行分析
-audio_channel = audio_data[:, 0]
+if audio_channel.ndim > 1:
+    audio_channel = audio_channel[:, 0]
 
 # 执行一维DWT变换（使用Daubechies小波 'db1' 作为示例）
 coeffs = pywt.wavedec(audio_channel, wavelet='db1', level=4)
