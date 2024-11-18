@@ -3,3 +3,6 @@
 
 # Virtural environment
 .venv/
+
+# MISC
+_DS_Store
