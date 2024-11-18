@@ -15,11 +15,11 @@ def chi_square_test(image_path):
     for i in range(256):
         expected_freq[i] = (observed_freq[i // 2 * 2] + observed_freq[i // 2 * 2 + 1]) / 2
 
-    # 计算卡方值
-    chi_square_stat = np.sum((observed_freq - expected_freq) ** 2 / expected_freq)
-
+    # 计算卡方值(仅考虑非零期望频率)
+    valid_indices = expected_freq != 0
+    chi_square_stat = np.sum((observed_freq[valid_indices] - expected_freq[valid_indices]) ** 2 / expected_freq[valid_indices])
     print(f"Chi-square statistic for {image_path}: {chi_square_stat}")
 
 # 应用卡方测试
-chi_square_test('cover_image.png')
-chi_square_test('stego_image.png')
+chi_square_test('./resource/2/DSC04813.png')
+chi_square_test('./resource/2/output1.png')
