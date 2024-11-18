@@ -15,8 +15,8 @@ def check_bmp_for_hidden_data(bmp_file):
         biBitCount = struct.unpack('H', f.read(2))[0]
         biCompression = struct.unpack('I', f.read(4))[0]
         biSizeImage = struct.unpack('I', f.read(4))[0]
-        biXPelsPerMeter = struct.unpack('I', f.read(4))[0]
-        biYPelsPerMeter = struct.unpack('I', f.read(4))[0]
+        biXPelsPerMeter = struct.unpack('i', f.read(4))[0]
+        biYPelsPerMeter = struct.unpack('i', f.read(4))[0]
         biClrUsed = struct.unpack('I', f.read(4))[0]
         biClrImportant = struct.unpack('I', f.read(4))[0]
 
