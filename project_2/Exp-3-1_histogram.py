@@ -27,4 +27,4 @@ def plot_histograms(original_image_path, stego_image_path):
     plt.show()
 
 # 显示原始图像和含密图像的直方图
-plot_histograms('cover_image.png', 'stego_image.png')
+plot_histograms('./resource/2/DSC04813.png', './resource/2/output1.png')
