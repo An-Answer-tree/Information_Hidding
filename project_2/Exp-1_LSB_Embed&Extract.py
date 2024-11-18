@@ -3,35 +3,33 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 def lsb_hide(cover_image_path, secret_message, output_image_path):
+    # 将秘密信息转换为二进制
+    secret_bits = ''.join([format(ord(i), '08b') for i in secret_message])
+    n_bits = len(secret_bits)
+    
     # 加载载体图像
     img = Image.open(cover_image_path)
     img_array = np.array(img)
 
-    # 将秘密信息转换为二进制
-    secret_bits = ''.join([format(ord(i), '08b') for i in secret_message])
-    n_bits = len(secret_bits)
-
     # 获取图像的尺寸
     rows, cols, channels = img_array.shape
-
     # 计算可用的最低有效位数量
     total_pixels = rows * cols * channels
     if n_bits > total_pixels:
-        raise ValueError("秘密信息过大，无法嵌入！")
+        raise ValueError("Message is too long to fit in the image")
 
     # 展平图像数组
     flat_img = img_array.flatten()
-
     # 嵌入秘密信息
     for i in range(n_bits):
         bit = int(secret_bits[i])
-        flat_img[i] = (flat_img[i] & ~1) | bit  # 将最低有效位替换为秘密比特
+        flat_img[i] = (flat_img[i] & 0b11111110) | bit  # 将最低有效位替换为秘密比特
 
     # 生成含密图像
     stego_img_array = flat_img.reshape(img_array.shape)
     stego_img = Image.fromarray(stego_img_array.astype('uint8'))
     stego_img.save(output_image_path)
-    print(f"秘密信息已成功嵌入，生成的图像保存为 {output_image_path}")
+    print(f"Message hidden successfully in {output_image_path}")
     
     
 def lsb_extract(stego_image_path, message_length):
@@ -54,7 +52,7 @@ def lsb_extract(stego_image_path, message_length):
         byte = secret_bits[i:i+8]
         secret_message += chr(int(byte, 2))
 
-    print(f"提取的秘密信息为：{secret_message}")
+    print(f"Secret message is: {secret_message}")
     return secret_message
 
 
@@ -77,15 +75,17 @@ def calculate_psnr(original_image_path, stego_image_path):
     # 计算PSNR
     PIXEL_MAX = 255.0
     psnr = 10 * np.log10((PIXEL_MAX ** 2) / mse)
-    print(f"PSNR值为：{psnr} dB")
+    print(f"PSNR: {psnr} dB")
     return psnr
 
 
 def main():
     # 定义文件路径和秘密信息
-    cover_image_path = 'cover_image.png'  # 载体图像路径
-    stego_image_path = 'stego_image.png'  # 含密图像保存路径
-    secret_message = 'Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!Hello, World!'      # 秘密信息
+    cover_image_path = './resource/2/DSC04813.png'  # 载体图像路径
+    stego_image_path = './resource/2/output1.png'  # 含密图像保存路径
+    # 秘密信息
+    secret_message = 'NiceOpinionButTheresJustOneSmallProblemWithIt:WhoAsked?LikeGenuinelyWhoAsked?WhoGaveYouTheTalkingStick?IllTellYouNobodyDidNobodyAskedDudeThereAreZeroPeopleWhoAskedAmongUsLookIInvitedEveryoneWhoAskedToThisPartyAYOThisIsPhotoOfEveryoneWhoAskedYooCheckItOutItsABusFullOfEveryoneWhoAskedYouKnowWhatManIllDoYouAFavorClearlyWeCantSeeWhoAskedSoImJustGonnaDoItMyselfImGonnaFindOutWhoAsked'
+    # secret_message = "\u004E"
 
     # 调用隐藏算法
     lsb_hide(cover_image_path, secret_message, stego_image_path)
@@ -98,9 +98,9 @@ def main():
 
     # 验证提取的消息是否正确
     if secret_message == extracted_message:
-        print("信息提取成功，秘密信息完整无误。")
+        print("Message extracted successfully.")
     else:
-        print("信息提取失败，秘密信息有误。")
+        print("Extraction does not match the original message.")
 
 if __name__ == '__main__':
     main()
