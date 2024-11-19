@@ -10,11 +10,13 @@ def hide_message_in_bmp(bmp_file, txt_file, output_file):
     with open(txt_file, 'r') as f:
         hidden_message = f.read()
     hidden_message_bytes = hidden_message.encode('utf-8')
+     # 按4字节对齐
+    hidden_message_bytes += b'\x00' * (4 - len(hidden_message_bytes) % 4)
     
     # 计算新的偏移量
     offset = 54 + len(hidden_message_bytes)
     
-    # 修改 BMP 头部，特别是数据偏移量，假设原偏移量在 10 到 13 字节之间
+    # 修改 BMP 头部中的数据偏移量(DWORD biOffbits #000Ah)
     modified_header = header[:10] + struct.pack('<I', offset) + header[14:]
     
     # 创建新的 BMP 文件
